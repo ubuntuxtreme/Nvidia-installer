@@ -155,6 +155,7 @@ nVIDIA_Prop_3()
 	# Reboot your machine
 	intro
 	echo -e "\e[1;32mReboot your PC\e[0m"
+	sleep 5
 	sudo shutdown -r 0;
 
 }
