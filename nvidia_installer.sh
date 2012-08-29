@@ -20,14 +20,28 @@ intro()
 }
 
 # Check Sources (for ain error)
-
 check_sources()
 {
 sources_xorg=`cat /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list| wc -l`
 if [ -s /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list ] ; then
 	if [ $sources_xorg -ne 2 ] ; then
-		awk 'NR%3 != 0' /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list > /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list
-		awk 'NR%3 != 0' /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list.save > /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list.save
+		temp1=`awk 'NR%3 != 0' /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list`
+		echo $temp1 > /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list
+		
+		# Construct first line
+		line1_deb=`echo $temp1 | grep main | awk '{ print $1 }'`;
+		line1_url=`echo $temp1 | grep main | awk '{ print $2 }'`;
+		line1_ubuntu=`echo $temp1 | grep main | awk '{ print $3 }'`;
+		line1_main=`echo $temp1 | grep main | awk '{ print $4 }'`;
+				
+		line2_deb=`echo $temp1 | grep main | awk '{ print $5 }'`;
+		line2_url=`echo $temp1 | grep main | awk '{ print $6 }'`;
+		line2_ubuntu=`echo $temp1 | grep main | awk '{ print $7 }'`;
+		line2_main=`echo $temp1 | grep main | awk '{ print $8 }'`;
+		echo -e "$line1_deb $line1_url $line1_ubuntu $line1_main\n$line2_deb $line2_url $line2_ubuntu $line2_main" > /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list;
+		
+
+		sudo cp xorg-edgers-ppa-precise.list xorg-edgers-ppa-precise.list.save
 	else
 		echo "Sources Integrity Ok"
 	fi
@@ -37,6 +51,8 @@ fi
 }
 
 check_sources
+
+
 
 # Routine for Latest NVIDIA Proprietary Drivers
 nVIDIA_Prop_2()
