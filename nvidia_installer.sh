@@ -19,6 +19,25 @@ intro()
 	echo -e "\e[0m"
 }
 
+# Check Sources (for ain error)
+
+check_sources()
+{
+sources_xorg=`cat /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list| wc -l`
+if [ -s /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list ] ; then
+	if [ $sources_xorg -ne 2 ] ; then
+		awk 'NR%3 != 0' /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list > /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list
+		awk 'NR%3 != 0' /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list.save > /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list.save
+	else
+		echo "Sources Integrity Ok"
+	fi
+else
+	echo "Xorg-Edgers PPA is NOT installed"
+fi
+}
+
+check_sources
+
 # Routine for Latest NVIDIA Proprietary Drivers
 nVIDIA_Prop_2()
 {
@@ -70,6 +89,11 @@ nVIDIA_Prop_2()
     echo -e "\e[1;32mAdd Xorg-Edgers PPA\e[0m"
     sleep 1
     echo "\n" | sudo add-apt-repository ppa:xorg-edgers/ppa;
+
+    # Check if Xorg-Edgers installed correctly
+    check_sources
+
+    # Update
     sudo apt-get -qq update;
 
     # update xdiagnose and xserver-xorg-video-intel
