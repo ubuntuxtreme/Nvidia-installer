@@ -10,7 +10,7 @@ intro()
 {	clear
 	echo -e "\e[1;32m ______________________________________________________"
 	echo "|                                                      |"
-	echo "|       uXeye GPU Drivers Installer ver 1.0            |"
+	echo "|       uXeye GPU Drivers Installer ver 1.1            |"
 	echo "|                 UbuntuXtreme.com                     |"
 	echo "|                                                      |"
 	echo "| Welcome to UbuntuXtreme's automated installer script |"
@@ -387,7 +387,7 @@ if [ "$gpudriver" == "nouveau" ]; then
     clear
     echo -e "\e[1;32m ______________________________________________________"
     echo "|                                                      |"
-    echo "|       uXeye GPU Drivers Installer ver 1.0            |"
+    echo "|       uXeye GPU Drivers Installer ver 1.1            |"
     echo "|                 UbuntuXtreme.com                     |"
     echo "|                                                      |"
     echo "| Welcome to UbuntuXtreme's automated installer script |"
@@ -416,7 +416,7 @@ if [ "$gpudriver" == "" ]; then
     clear
     echo -e "\e[1;32m ______________________________________________________"
     echo "|                                                      |"
-    echo "|       uXeye GPU Drivers Installer ver 1.0            |"
+    echo "|       uXeye GPU Drivers Installer ver 1.1            |"
     echo "|                 UbuntuXtreme.com                     |"
     echo "|                                                      |"
     echo "| Welcome to UbuntuXtreme's automated installer script |"
