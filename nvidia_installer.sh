@@ -3,7 +3,8 @@
 # Author: drpaneas@ubuntuxtreme.com
 # Date: 22/08/2012
 # License Artistic License 2.0 
-# Remove Open Source Drivers
+# Version 1.1 beta
+
 
 intro()
 {	clear
@@ -18,15 +19,19 @@ intro()
 	echo "|______________________________________________________|"
 	echo -e "\e[0m"
 }
+ubuntu_ver=`lsb_release -a | grep Codename |awk '{ print $2 }'`
 
 # Check Sources (for ain error)
 check_sources()
 {
-sources_xorg=`cat /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list| wc -l`
-if [ -s /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list ] ; then
+ubuntu_version=`lsb_release -a | grep Codename |awk '{ print $2 }'`
+
+# Xorg-Edgers PPA Check
+sources_xorg=`cat /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_version.list| wc -l`
+if [ -s /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_version.list ] ; then
 	if [ $sources_xorg -ne 2 ] ; then
-		temp1=`awk 'NR%3 != 0' /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list`
-		echo $temp1 > /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list
+		temp1=`awk 'NR%3 != 0' /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_version.list`
+		echo $temp1 > /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_version.list
 		
 		# Construct first line
 		line1_deb=`echo $temp1 | grep main | awk '{ print $1 }'`;
@@ -38,19 +43,134 @@ if [ -s /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list ] ; then
 		line2_url=`echo $temp1 | grep main | awk '{ print $6 }'`;
 		line2_ubuntu=`echo $temp1 | grep main | awk '{ print $7 }'`;
 		line2_main=`echo $temp1 | grep main | awk '{ print $8 }'`;
-		echo -e "$line1_deb $line1_url $line1_ubuntu $line1_main\n$line2_deb $line2_url $line2_ubuntu $line2_main" > /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list;
+		echo -e "$line1_deb $line1_url $line1_ubuntu $line1_main\n$line2_deb $line2_url $line2_ubuntu $line2_main" > /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_version.list;
 		
 
-		sudo cp xorg-edgers-ppa-precise.list xorg-edgers-ppa-precise.list.save
+		sudo cp /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_version.list /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_version.list.save
 	else
-		echo "Sources Integrity Ok"
+		echo "Xorg-Edgers Sources Integrity Ok"
 	fi
 else
 	echo "Xorg-Edgers PPA is NOT installed"
 fi
+
+
+# X-Swat PPA Check
+sources_swat=`cat /etc/apt/sources.list.d/ubuntu-x-swat-x-updates-$ubuntu_version.list| wc -l`
+if [ -s /etc/apt/sources.list.d/ubuntu-x-swat-x-updates-$ubuntu_version.list ] ; then
+	if [ $sources_swat -ne 2 ] ; then
+		temp1=`awk 'NR%3 != 0' /etc/apt/sources.list.d/ubuntu-x-swat-x-updates-$ubuntu_version.list`
+		echo $temp1 > /etc/apt/sources.list.d/ubuntu-x-swat-x-updates-$ubuntu_version.list
+		
+		# Construct first line
+		line1_deb=`echo $temp1 | grep main | awk '{ print $1 }'`;
+		line1_url=`echo $temp1 | grep main | awk '{ print $2 }'`;
+		line1_ubuntu=`echo $temp1 | grep main | awk '{ print $3 }'`;
+		line1_main=`echo $temp1 | grep main | awk '{ print $4 }'`;
+				
+		line2_deb=`echo $temp1 | grep main | awk '{ print $5 }'`;
+		line2_url=`echo $temp1 | grep main | awk '{ print $6 }'`;
+		line2_ubuntu=`echo $temp1 | grep main | awk '{ print $7 }'`;
+		line2_main=`echo $temp1 | grep main | awk '{ print $8 }'`;
+		echo -e "$line1_deb $line1_url $line1_ubuntu $line1_main\n$line2_deb $line2_url $line2_ubuntu $line2_main" > /etc/apt/sources.list.d/ubuntu-x-swat-x-updates-$ubuntu_version.list
+		
+
+		sudo cp /etc/apt/sources.list.d/ubuntu-x-swat-x-updates-$ubuntu_version.list /etc/apt/sources.list.d/ubuntu-x-swat-x-updates-$ubuntu_version.list.save
+	else
+		echo "X-Swat Sources Integrity Ok"
+	fi
+else
+	echo "X-Swat PPA is NOT installed"
+fi
 }
 
 check_sources
+
+
+# Routine for Latest NVIDIA Proprietary Drivers
+nVIDIA_Prop_1()
+{
+    # Remove Xorg-Edgers
+    intro
+    echo -e "\e[1;32mRemoving PPA Xorg-Edgers (if any) in case of beta drivers\e[0m"
+    sleep 1
+    echo "\n" | sudo ppa-purge ppa:xorg-edgers/ppa -y;
+    sudo rm /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_ver.list
+    sudo rm /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_ver.list.save
+    
+
+    # Remove Open Source Drivers
+    intro
+    echo -e "\e[1;32mRemoving Open Source Drivers (if any)\e[0m"
+    sleep 1
+    sudo rmmod -f vga16fb;
+    sudo rmmod -f nouveau;
+    sudo rmmod -f rivafb;
+    sudo rmmod -f nvidiafb;
+    sudo modprobe -b vga16fb;
+    sudo modprobe -b nouveau;
+    sudo modprobe -b rivafb;
+    sudo modprobe -b nvidiafb;
+    sudo apt-get --purge remove xserver-xorg-video-nouveau;
+    sudo update-initramfs -u;
+
+    # Remove nvidia proprietary
+    intro
+    echo -e "\e[1;32mRemove previous nVidia drivers\e[0m"
+    sleep 1
+    sudo apt-get -qq purge nvidia*;
+
+    # Remove all nvidia* packages in the system
+    intro
+    echo -e "\e[1;32mRemove previous nvidia packages\e[0m"  
+    sleep 1 
+    sudo dpkg -l | grep nvidia | awk '{ print $2 }' | xargs sudo apt-get -qq purge;
+			 
+    # Remove all the nvidia kernel objects currently installed
+    intro
+    echo -e "\e[1;32mRemove nVIDIA kernel modules\e[0m"
+    sleep 1
+    export kernel_version=`uname -r`;
+    sudo rm -f `find /lib/modules/$kernel_version -iname nvidia.ko`;
+
+    # Install X-Swat
+    intro
+    echo -e "\e[1;32mAdd X-Swat PPA\e[0m"
+    sleep 1
+    echo "\n" | sudo add-apt-repository ppa:ubuntu-x-swat/x-updates;
+
+    # Check if X-Swat installed correctly
+    check_sources
+
+    # Update
+    sudo apt-get -qq update;
+
+    # update xdiagnose and xserver-xorg-video-intel
+    intro
+    echo -e "\e[1;32mUpdate xserver-xorg\e[0m"
+    sleep 1
+    sudo apt-get -qq upgrade;
+
+    # or install them
+    sudo apt-get -qq install xdiagnose xserver-xorg-video-intel;
+
+    # Install the latest stable nVIDIA unified driver
+    intro
+    echo -e "\e[1;32mInstalling drivers\e[0m"
+    sleep 1
+    sudo apt-get -qq install nvidia-current;
+
+    sudo apt-get -qq update;
+    sudo apt-get -qq upgrade;
+
+    # Reboot your machine
+    intro
+    echo -e "\e[1;32mRebooting your PC in 5 sec...\e[0m"
+    sleep 5
+    sudo shutdown -r 0;
+}
+
+
 
 
 
@@ -147,14 +267,15 @@ nVIDIA_Prop_3()
 
 	echo -e "\e[1;32mRemoving PPA Xorg-Edgers (if any) in case of beta drivers\e[0m"
 	echo "\n" | sudo ppa-purge ppa:xorg-edgers/ppa -y;
-	sudo rm /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list
-	sudo rm /etc/apt/sources.list.d/xorg-edgers-ppa-precise.list.save
+	sudo rm /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_ver.list
+	sudo rm /etc/apt/sources.list.d/xorg-edgers-ppa-$ubuntu_ver.list.save
 	
 	# Remove PPA X-Swat (in case of stable drivers)
 	intro
 	echo -e "\e[1;32mRemoving PPA X-Swat in case of stable drivers\e[0m"
 	echo "\n" | sudo ppa-purge ppa:ubuntu-x-swat/x-updates -y;
-	sudo rm /etc/apt/sources.list.d/ubuntu-x-swat-x-updates-*
+	sudo rm /etc/apt/sources.list.d/ubuntu-x-swat-x-updates-$ubuntu_version.list
+	sudo rm /etc/apt/sources.list.d/ubuntu-x-swat-x-updates-$ubuntu_version.list.save
 
 	# Remove Open Source Drivers
 	intro
@@ -195,7 +316,6 @@ nVIDIA_Prop_3()
 	# Reboot your machine
 	intro
 	echo -e "\e[1;32mReboot your PC\e[0m"
-	sleep 5
 	sudo shutdown -r 0;
 
 }
@@ -245,15 +365,17 @@ if [ "$gpudriver" == "nvidia" ]; then
     sleep 3
     intro
     echo -e "What do you want me to do ?"
-    echo -e "\e[1;32m1.\e[0m Update to the latest \033[1mProprietary\033[0m drivers"
-    echo -e "\e[1;32m2.\e[0m Remove Proprietary drivers and install Nouveau \033[1m(Open Source Drivers)\033[0m"
-    echo -e "\e[1;32m3.\e[0m Quit"
-    echo -e "Answer: (1, 2, or 3)"
+    echo -e "\e[1;32m1.\e[0m Update to the latest \033[1mbeta Proprietary\033[0m drivers"
+    echo -e "\e[1;32m2.\e[0m Update to the latest \033[1mstable Proprietary\033[0m drivers"
+    echo -e "\e[1;32m3.\e[0m Remove Proprietary drivers and install Nouveau \033[1m(Open Source Drivers)\033[0m"
+    echo -e "\e[1;32m4.\e[0m Quit"
+    echo -e "Answer: (1, 2, 3 or 4)"
     read n
     case $n in
             1) nVIDIA_Prop_2;;
-	    2) nVIDIA_Prop_3;;
-	    3) exit;;
+	    2) nVIDIA_Prop_1;;
+	    3) nVIDIA_Prop_3;;
+	    4) exit;;
 	    *) echo "invalid option. Exit...";;
     esac
 fi
@@ -274,20 +396,22 @@ if [ "$gpudriver" == "nouveau" ]; then
     echo "|______________________________________________________|"
     echo -e "\e[0m"
     echo -e "What do you want me to do ?"
-    echo -e "\e[1;32m1.\e[0m Remove OpenSource drivers and install latest \033[1mProprietary\033[0m drivers"
-    echo -e "\e[1;32m2.\e[0m Quit"
-    echo -e "Answer: (1 or 2)"
+    echo -e "\e[1;32m1.\e[0m Remove OpenSource drivers and install latest \033[1mbeta Proprietary\033[0m drivers"
+    echo -e "\e[1;32m2.\e[0m Remove OpenSource drivers and install latest \033[1mstable Proprietary\033[0m drivers"
+    echo -e "\e[1;32m3.\e[0m Quit"
+    echo -e "Answer: (1, 2 or 3)"
     read n
     case $n in
             1) nVIDIA_Prop_2;;
-	    2) exit;;
+	    2) nVIDIA_Prop_1;;
+	    3) exit;;
 	    *) echo "invalid option. Exit...";;
     esac
 fi
 
-# In case of NVIDIA Open Source Nouveau
+# In case of messed up drivers
 if [ "$gpudriver" == "" ]; then
-    echo -e "\nSo you have fucked up your drivers..."
+    echo -e "\nSo you have messed up your drivers..."
     sleep 3
     clear
     echo -e "\e[1;32m ______________________________________________________"
@@ -306,8 +430,10 @@ if [ "$gpudriver" == "" ]; then
     echo -e "Answer: (1 or 2)"
     read n
     case $n in
-            1) nVIDIA_Prop_2;;
+            1) nVIDIA_Prop_1;;
 	    2) exit;;
 	    *) echo "invalid option. Exit...";;
     esac
 fi
+
+
