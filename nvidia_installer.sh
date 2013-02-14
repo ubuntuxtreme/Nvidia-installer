@@ -241,11 +241,11 @@ nVIDIA_Prop_2()
     # or install them
     sudo apt-get -qq install xdiagnose xserver-xorg-video-intel;
 
-    # Install the latest stable nVIDIA unified driver
+    # Install the latest beta nVIDIA unified driver
     intro
     echo -e "\e[1;32mInstalling drivers\e[0m"
     sleep 1
-    sudo apt-get -qq install nvidia-current;
+    sudo apt-get -qq install nvidia-313-*;
 
     sudo apt-get -qq update;
     sudo apt-get -qq upgrade;
